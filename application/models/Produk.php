@@ -12,8 +12,10 @@ class Produk extends CI_Model {
         return $query->result();
     }
 
-    public function getAllDataWhere($table, $where) {
-        $this->db->where($where);
+    public function getAllDataWhere($table, $where, $escape = true) {
+        foreach ($where as $key => $value) {
+            $this->db->where($key, $value, $escape);
+        }
         $query = $this->db->get($table);
         return $query->result();
     }
@@ -24,15 +26,25 @@ class Produk extends CI_Model {
         return $query->num_rows();
     }
 
+    public function selectDataWhere($table, $select, $where) {
+        $this->db->select($select);
+        $this->db->where($where);
+        $query = $this->db->get($table);
+        return $query->result();
+    }
+
     public function insertData($table, $data) {
         $this->db->insert($table, $data);
         return ($this->db->affected_rows() > 0) ? true : false;
     }
 
-    public function updateData($table, $where, $data) {
+    public function updateData($table, $where, $data, $escape = true) {
+        foreach ($data as $key => $value) {
+            $this->db->set($key, $value, $escape);
+        }
         $this->db->where($where);
-        $this->db->update($table, $data);
-        return ($this->db->affected_rows() >= 0) ? true : false;
+        $this->db->update($table);
+        return ($this->db->affected_rows() > 0) ? true : false;
     }
 
     public function deleteData($table, $where) {

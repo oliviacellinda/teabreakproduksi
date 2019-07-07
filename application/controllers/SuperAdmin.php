@@ -108,7 +108,7 @@ class SuperAdmin extends CI_Controller {
 
         $where = array('kode_bahan_baku' => $kode);
         if( $this->produk->countAllDataWhere('bahan_baku', $where) > 0 ) {
-            echo 'Kode sudah ada di dalam database.';
+            echo 'Kode sudah ada di dalam database';
             die();
         }
         
@@ -118,10 +118,10 @@ class SuperAdmin extends CI_Controller {
             'harga_beli'        => $harga
         );
         if( $this->produk->insertData('bahan_baku', $data) ) {
-            echo 'Data berhasil ditambahkan.';
+            echo 'Data berhasil ditambahkan';
         }
         else {
-            echo 'Data gagal ditambahkan. Silakan mencoba kembali.';
+            echo 'Data gagal ditambahkan';
         }
     }
 
@@ -150,7 +150,7 @@ class SuperAdmin extends CI_Controller {
 
         $where = array('kode_bahan_baku' => $kode);
         if( $this->produk->countAllDataWhere('bahan_baku', $where) > 0 && $kode != $kodeLama ) {
-            echo 'Kode sudah ada di dalam database.';
+            echo 'Kode sudah ada di dalam database';
             die();
         }
 
@@ -161,10 +161,10 @@ class SuperAdmin extends CI_Controller {
             'harga_beli'        => $harga
         );
         if( $this->produk->updateData('bahan_baku', $where, $data) ) {
-            echo 'Data berhasil diubah.';
+            echo 'Data berhasil diubah';
         }
         else {
-            echo 'Data gagal diubah. Silakan mencoba kembali.';
+            echo 'Data gagal diubah';
         }
     }
 
@@ -208,7 +208,7 @@ class SuperAdmin extends CI_Controller {
 
         $where = array('kode_bahan_jadi' => $kode);
         if( $this->produk->countAllDataWhere('bahan_jadi', $where) > 0 ) {
-            echo 'Kode sudah ada di dalam database.';
+            echo 'Kode sudah ada di dalam database';
             die();
         }
         
@@ -218,10 +218,10 @@ class SuperAdmin extends CI_Controller {
             'harga_jual'        => $harga
         );
         if( $this->produk->insertData('bahan_jadi', $data) ) {
-            echo 'Data berhasil ditambahkan.';
+            echo 'Data berhasil ditambahkan';
         }
         else {
-            echo 'Data gagal ditambahkan. Silakan mencoba kembali.';
+            echo 'Data gagal ditambahkan';
         }
     }
 
@@ -250,7 +250,7 @@ class SuperAdmin extends CI_Controller {
 
         $where = array('kode_bahan_jadi' => $kode);
         if( $this->produk->countAllDataWhere('bahan_jadi', $where) > 0 && $kode != $kodeLama ) {
-            echo 'Kode sudah ada di dalam database.';
+            echo 'Kode sudah ada di dalam database';
             die();
         }
 
@@ -261,10 +261,10 @@ class SuperAdmin extends CI_Controller {
             'harga_jual'        => $harga
         );
         if( $this->produk->updateData('bahan_jadi', $where, $data) ) {
-            echo 'Data berhasil diubah.';
+            echo 'Data berhasil diubah';
         }
         else {
-            echo 'Data gagal diubah. Silakan mencoba kembali.';
+            echo 'Data gagal diubah';
         }
     }
 
@@ -317,6 +317,17 @@ class SuperAdmin extends CI_Controller {
         $kode = $this->input->post('kode');
         $resep = json_decode($this->input->post('resepString'));
 
+        if($resep == '' || count($resep) == 0) {
+            echo 'Data tidak ada!';
+            die();
+        }
+
+        $where = array('kode_bahan_jadi' => $kode);
+        if( $this->produk->countAllDataWhere('bahan_jadi', $where) == 0 ) {
+            echo 'Kode bahan jadi tidak ditemukan';
+            die();
+        }
+
         // Hapus dulu data resep sebelumnya
         $where = array('kode_bahan_jadi' => $kode);
         $this->produk->deleteData('resep', $where);
@@ -330,7 +341,7 @@ class SuperAdmin extends CI_Controller {
             $this->produk->insertData('resep', $data);
         }
 
-        echo 'Data berhasil disimpan.';
+        echo 'Data berhasil disimpan';
     }
 
     public function masterCabang() {

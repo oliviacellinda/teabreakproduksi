@@ -13,3 +13,7 @@
 .teal{
 	color: teal;
 }
+
+.modal {
+	overflow-y: auto;
+}

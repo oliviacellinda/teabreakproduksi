@@ -71,6 +71,7 @@ $route['mastersupplier']        = 'superadmin/mastersupplier';
 // ADMIN
 $route['dashboardadmin']        = 'admin/dashboard';
 $route['bahanbakumasuk']        = 'admin/bahanbakumasuk';
+$route['sistemproduksi']        = 'admin/sistemproduksi';
 
 
 // ACCOUNTING

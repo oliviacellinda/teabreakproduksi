@@ -72,6 +72,9 @@
                     <li id="bahanbakumasuk">
                         <a href="<?=base_url('bahanbakumasuk');?>"> <i class="menu-icon ti-package"></i>Bahan Baku Masuk</a>
                     </li>
+                    <li id="sistemproduksi">
+                        <a href="<?=base_url('sistemproduksi');?>"> <i class="menu-icon ti-paint-bucket"></i>Sistem Produksi</a>
+                    </li>
                 </ul>
             </div>
 

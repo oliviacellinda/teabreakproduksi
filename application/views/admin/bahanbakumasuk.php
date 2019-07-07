@@ -52,10 +52,18 @@
                 <div class="modal-body">
 
                     <div class="row">
-                        <div class="col-sm-12">
-                            <div class="form-group">
-                                <label for="nomor" class=" form-control-label">Nomor Surat Jalan</label>
-                                <input type="text" id="nomor" class="form-control">
+                        <div class="col-sm-6">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="nomor" class=" form-control-label">Nomor Surat Jalan</label>
+                                    <input type="text" id="nomor" class="form-control" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="tanggal" class=" form-control-label">Tanggal Surat Jalan</label>
+                                    <input type="text" id="tanggal" class="form-control" autocomplete="off" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -123,7 +131,6 @@
     <script src=<?php echo base_url("assets/js/popper.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/plugins.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/main.js"); ?>></script>
-    <script src=<?php echo base_url("assets/js/lib/chosen/chosen.jquery.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/datatable/dataTables.min.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/dataTables.buttons.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/buttons.print.js")?>></script>
@@ -150,6 +157,10 @@
         }
 
         function tambahDataMasuk() {
+            daftar = new Array();
+            jQuery('#nomor').val('');
+            jQuery('#tanggal').val(moment().format('D MMMM YYYY'));
+            jQuery('#tabelBahanBakuMasuk tbody').remove();
             jQuery('#modalEdit').modal('show');
             jenisAksi = 'tambah';
         }
@@ -265,12 +276,17 @@
         function simpanEdit() {
             var flag = false;
             for(var i=0; i<daftar.length; i++) {
-                if(daftar[i].jumlah == 0) flag = true;
-                break;
+                if(daftar[i].jumlah == 0) {
+                    flag = true;
+                    break;
+                }
             }
-
-            if(flag) {
-                alert('Periksa kembali data Anda.');
+            
+            if(daftar.length == 0) {
+                alert('Data tidak ada!');
+            }
+            else if(flag) {
+                alert('Periksa kembali data Anda');
             }
             else {
                 var daftarString = JSON.stringify(daftar);
@@ -285,6 +301,10 @@
                     },
                     success : function(data) {
                         if(data == 'Data berhasil disimpan') {
+                            daftar = new Array();
+                            jQuery('#nomor').val('');
+                            jQuery('#tanggal').val('');
+                            jQuery('#tabelBahanBakuMasuk tbody').remove();
                             jQuery('#modalEdit').modal('hide');
                             reloadTable();
                             alert(data);
@@ -329,12 +349,22 @@
                         jumlahData = datatable.data.length;
                         var returnData = new Array();
                         for(var i=0; i<datatable.data.length; i++) {
-                            returnData.push({
-                                'no_surat_jalan'        : datatable.data[i].no_surat_jalan,
-                                'tanggal_surat_jalan'   : datatable.data[i].tanggal_surat_jalan,
-                                'edit'                  : '<button onclick=\"editBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-warning" style="color:white;">Edit</button>',
-                                'hapus'                 : '<button onclick=\"hapusBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-danger" style="color:white;">Hapus</button>',
-                            });
+                            if(datatable.data[i].flag_edit_admin == 1) {
+                                returnData.push({
+                                    'no_surat_jalan'        : datatable.data[i].no_surat_jalan,
+                                    'tanggal_surat_jalan'   : datatable.data[i].tanggal_surat_jalan,
+                                    'edit'                  : '<button onclick=\"editBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-warning" style="color:white;">Edit</button>',
+                                    'hapus'                 : '<button onclick=\"hapusBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-danger" style="color:white;">Hapus</button>',
+                                });
+                            }
+                            else {
+                                returnData.push({
+                                    'no_surat_jalan'        : datatable.data[i].no_surat_jalan,
+                                    'tanggal_surat_jalan'   : datatable.data[i].tanggal_surat_jalan,
+                                    'edit'                  : '<button onclick=\"editBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-warning" style="color:white;" disabled>Edit</button>',
+                                    'hapus'                 : '<button onclick=\"hapusBahanBakuMasuk(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-danger" style="color:white;" disabled>Hapus</button>',
+                                });
+                            }
                         }
                         return returnData;
                     },
@@ -346,7 +376,7 @@
                     { data  : 'hapus', orderable : false, searchable : false },
                 ],
                 columnDefs : [
-                    { targets : 1, render : $.fn.dataTable.render.moment('YYYY-MM-DD HH:mm:ss', 'D MMMM YYYY HH:mm', 'id') },
+                    { targets : 1, render : $.fn.dataTable.render.moment('YYYY-MM-DD', 'D MMMM YYYY', 'id') },
                 ],
                 // dom : 'Bfrtlip',
                 // buttons : [

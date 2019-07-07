@@ -2,7 +2,7 @@
             <div class="col-sm-12">
                 <div class="page-header">
                     <div class="page-title">
-                        <h1>Nota dan Laporan Pembelian</h1>
+                        <h1>Sistem Produksi</h1>
                     </div>
                 </div>
             </div>
@@ -15,18 +15,20 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header">
-                                <strong class="card-title">Data Nota Pembelian</strong>
+                                <strong class="card-title">Tambah Produksi</strong>
                             </div>
                             <div class="card-body">
-                          
+
+                                <button onclick="tambahProduksi()" class="btn btn-success" style="margin-bottom: 10px;">Tambah Produksi</button>
+                            
                                 <table id="tabelData" class="table table-striped table-bordered" style="width: 100%;" width="100%">
                                     <thead>
                                         <tr>
-                                            <td>Nomor Surat Jalan</td>
-                                            <td>Nomor Nota</td>
-                                            <td>Tanggal Nota</td>
+                                            <td>Kode Produksi</td>
+                                            <td>Tanggal</td>
                                             <td>Edit</td>
                                             <td>Delete</td>
+                                            <td>Save PDF</td>
                                         </tr>
                                     </thead>
                                 </table>
@@ -42,53 +44,47 @@
     </div> <!-- /.right-panel -->
 
     <div class="modal fade" id="modalEdit" role="dialog">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="header modal-header">
-                    <h4 class="modal-title">Edit Nota Pembelian</h4>
+                    <h4 class="modal-title"></h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
 
                     <div class="row">
                         <div class="col-sm-6">
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <label for="nomor" class=" form-control-label">Nomor Nota</label>
-                                    <input type="text" id="nomor" class="form-control">
-                                </div>
-                            </div>
-                            <div class="col-sm-12">
-                                <div class="form-group">
-                                    <label for="nomor" class=" form-control-label">Tanggal Nota</label>
-                                    <input type="text" id="tanggal" class="form-control">
-                                </div>
+                            <div class="form-group">
+                                <label for="namaProduk" class=" form-control-label">Nama Produk</label>
+                                <select name="namaProduk" id="namaProduk"></select>
                             </div>
                         </div>
                         <div class="col-sm-6">
-                            <p>Nomor Surat Jalan : <span id="noSurat"></span></p>
-                            <p>Tanggal Surat Jalan : <span id="tglSurat"></span></p>
+                            <div class="form-group">
+                                <label for="jumlahProduksi" class=" form-control-label">Jumlah Produksi</label>
+                                <input type="text" name="jumlahProduksi" id="jumlahProduksi" class="form-control numeric">
+                            </div>
                         </div>
                     </div>
 
                     <div class="row" style="margin-top: 10px;">
                         <div class="col-sm-12">
-                            <table id="tabelDetailNotaPembelian" class="table table-striped table-bordered text-center" style="width: 100%;" width="100%">
+                            <p><strong>Kebutuhan Bahan</strong></p>
+                            <table id="tabelBahan" class="table table-striped table-bordered text-center" style="width: 100%;" width="100%">
                                 <thead>
                                     <tr>
-                                        <td width="40%">Nama Bahan Baku</td>
-                                        <td width="20%">Jumlah (kg)</td>
-                                        <td width="20%">Harga</td>
-                                        <td width="20%">Total Harga</td>
+                                        <td>Nama Bahan</td>
+                                        <td>Jumlah Bahan (kg)</td>
                                     </tr>
                                 </thead>
                             </table>
                         </div>
                     </div>
 
-                    <div class="row" style="margin-top: 10px">
-                        <div class="col-sm-4 offset-sm-8">
-                            <p><strong>Total : <span id="totalNota"></span></strong></p>
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="form-group">
+                            <label for="hasilSebenarnya" class=" form-control-label">Hasil Sebenarnya</label>
+                            <input type="text" name="hasilSebenarnya" id="hasilSebenarnya" class="form-control numeric">
                         </div>
                     </div>
                 </div>
@@ -113,7 +109,6 @@
     <script src=<?php echo base_url("assets/datatable/pdfmake-0.1.36/vfs_fonts.js")?>></script>
     <script src=<?php echo base_url("assets/js/jquery.easy-autocomplete.js")?>></script>
     <script src=<?php echo base_url("assets/vendors/moment/min/moment-with-locales.min.js")?>></script>
-    <script src=<?php echo base_url("assets/vendors/Date-Time-Picker-Bootstrap-4/build/js/bootstrap-datetimepicker.min.js")?>></script>
     <script src=<?php echo base_url("assets/js/teabreak.js")?>></script>
     <script src=<?php echo base_url("assets/js/datetime-moment.js")?>></script>
     <script src=<?php echo base_url("assets/js/datetime.js")?>></script>
@@ -122,59 +117,46 @@
         moment.locale('id');
         var tabel;
         var jumlahData;
-        var daftar;
-        var nomorLama;
+        var jenisAksi;
 
         function reloadTable() {
             tabel.api().ajax.reload(null,false);
         }
 
-        function editNotaPembelian(nomor) {
-            daftar = new Array();
-            jQuery('#noSurat').text(nomor);
-            jQuery('#tabelDetailNotaPembelian tbody').remove();
+        function tambahProduksi() {
+            jQuery('#hasilSebenarnya').prop('disabled', true);
+            jQuery('#modalEdit').modal('show');
+            jenisAksi = 'tambah';
+        }
+
+        function editProduksi(kode) {
+            jQuery('#tabelBahan tbody').remove();
+            jenisAksi = 'edit';
             
             jQuery.ajax({
                 type    : 'post',
-                url     : '<?=base_url('accounting/ambilNotaPembelian');?>',
+                url     : '<?=base_url('admin/ambilProduksi');?>',
                 dataType: 'json',
-                data    : { nomor : nomor },
+                data    : { kode : kode },
                 success : function(data) {
                     if(data == '') {
-                        var tabelDetailNotaPembelian = '<tbody>'+
+                        var tabelBahan = '<tbody>'+
                             '<tr>'+
-                                '<td colspan="4" class="text-center">Tidak ada data.</td>'+
+                                '<td colspan="3" class="text-center">Tidak ada data.</td>'+
                             '</tr>'+
                         '<tbody>';
-                        jQuery('#tabelDetailNotaPembelian').append(tabelDetailNotaPembelian);
+                        jQuery('#tabelBahan').append(tabelBahan);
                     }
                     else {
-                        nomorLama = data[0].no_nota;
-                        var tglSurat = moment(data[0].tanggal_surat_jalan).format('D MMMM YYYY HH:mm');
-                        var tglNota = moment(data[0].tanggal_nota).format('D MMMM YYYY');
-                        jQuery('#tglSurat').text(tglSurat);
-                        jQuery('#nomor').val(data[0].no_nota);
-                        jQuery('#tanggal').val(tglNota);
-                        jQuery('#totalNota').text('Rp '+parseInt(data[0].total_pembelian).toLocaleString('id')+',00');
-
-                        var tabelDetailNotaPembelian = '<tbody>';
+                        var tabelBahan = '<tbody>';
                         for(var i=0; i<data.length; i++) {
-                            tabelDetailNotaPembelian += '<tr data-kode="'+data[i].kode_bahan_baku+'">'+
-                                '<td>'+data[i].nama_bahan_baku+'</td>'+
-                                '<td>'+data[i].jumlah+'</td>'+
-                                '<td><input type="text" class="form-control numeric" value="'+data[i].harga_beli+'"></td>'+
-                                '<td id="totalHarga">Rp '+parseInt(data[i].total_harga).toLocaleString('id')+',00</td>'+
+                            tabelBahan += '<tr>'+
+                                '<td>'+data.resep[i].nama_bahan_baku+'</td>'+
+                                '<td>'+data.resep[i].jumlah_bahan_baku+'</td>'+
                             '</tr>';
-                            var row = {
-                                kode    : data[i].kode_bahan_baku,
-                                jumlah  : data[i].jumlah,
-                                harga   : data[i].harga_beli,
-                                total   : data[i].total_harga,
-                            };
-                            daftar.push(row);
                         }
-                        tabelDetailNotaPembelian += '</tbody>';
-                        jQuery('#tabelDetailNotaPembelian').append(tabelDetailNotaPembelian);
+                        tabelBahan += '</tbody>';
+                        jQuery('#tabelBahan').append(tabelBahan);
                     }
                     jQuery('#modalEdit').modal('show');
                 },
@@ -185,24 +167,6 @@
         }
 
         function simpanEdit() {
-            jQuery('.is-invalid').removeClass('is-invalid');
-
-            var flag = false;
-            if(jQuery('#nomor').val().trim() == '') {
-                jQuery('#nomor').addClass('is-invalid');
-                flag = true;
-            }
-            if(jQuery('#tanggal').val().trim() == '') {
-                jQuery('#tanggal').addClass('is-invalid');
-                flag = true;
-            }
-            for(var i=0; i<daftar.length; i++) {
-                if(daftar[i].harga == 0) {
-                    flag = true;
-                    break;
-                }
-            }
-
             if(daftar.length == 0) {
                 alert('Data tidak ada!');
             }
@@ -210,21 +174,15 @@
                 alert('Periksa kembali data Anda');
             }
             else {
-                var tanggal = jQuery('#tanggal').val().trim().toString();
-                var noNota = jQuery('#nomor').val().trim();
-                var tglNota = moment(tanggal, 'D MMMM YYYY').format('YYYY-MM-DD');
-                var noSurat = jQuery('#noSurat').text().trim();
                 var daftarString = JSON.stringify(daftar);
-
+                var nomor = jQuery('#nomor').val();
                 jQuery.ajax({
                     type    : 'post',
-                    url     : '<?=base_url('accounting/editNotaPembelian');?>',
-                    data    : {
-                        noNota      : noNota,
-                        tglNota     : tglNota,
-                        noSurat     : noSurat,
-                        daftar      : daftarString,
-                        nomorLama   : nomorLama
+                    url     : '<?=base_url('admin/simpanBahanBakuMasuk');?>',
+                    data    : { 
+                        nomor       : nomor,
+                        daftarString: daftarString,
+                        jenisAksi   : jenisAksi
                     },
                     success : function(data) {
                         if(data == 'Data berhasil disimpan') {
@@ -232,19 +190,8 @@
                             reloadTable();
                             alert(data);
                         }
-                        else if(data == 'Data tidak ada!') {
-                            alert(data);
-                        }
-                        else if(data == 'Nomor nota sudah ada di dalam database') {
-                            alert(data);
-                            jQuery('#nomor').addClass('is-invalid');
-                        }
-                        else if(data == 'Tanggal nota tidak dapat dipasang sebelum tanggal surat jalan') {
-                            alert(data);
-                            jQuery('#tanggal').addClass('is-invalid');
-                        }
                         else {
-                            alert('Unknown error occured!');
+                            alert(data);
                         }
                     },
                     error   : function (jqXHR, textStatus, errorThrown) {
@@ -254,44 +201,53 @@
             }
         }
 
-        jQuery(document).ready(function($) {
-            $('#tanggal').datetimepicker({
-                format  : 'D MMMM YYYY',
-                locale  : 'id'
-            });
+        function hapusProduksi(nomor) {
+            if( confirm('Apakah Anda yakin ingin menghapus data ' + nomor + '?') ) {
+                jQuery.ajax({
+                    type    : 'post',
+                    url     : '<?=base_url('admin/hapusProduksi');?>',
+                    data    : { nomor : nomor },
+                    success : function(data) {
+                        reloadTable();
+                    },
+                    error   : function (jqXHR, textStatus, errorThrown) {
+                        alert(errorThrown);
+                    }
+                });
+            }
+        }
 
-            $.fn.dataTable.moment('D MMMM YYYY HH:mm', 'id');
+        jQuery(document).ready(function($) {
+            $.fn.dataTable.moment('D MMMM YYYY', 'id');
             tabel = jQuery('#tabelData').dataTable({
                 oLanguage : { sProcessing : "Loading..." },
                 responsive : true,
                 serverSide : true,
                 ajax : {
                     type    : 'POST',
-                    url     : '<?=base_url('accounting/daftarNotaPembelian');?>',
+                    url     : '<?=base_url('admin/daftarProduksi');?>',
                     dataSrc : function(datatable) {
                         jumlahData = datatable.data.length;
                         var returnData = new Array();
                         for(var i=0; i<datatable.data.length; i++) {
                             returnData.push({
-                                'no_surat_jalan': datatable.data[i].no_surat_jalan,
-                                'no_nota'       : datatable.data[i].no_nota,
-                                'tanggal_nota'  : datatable.data[i].tanggal_nota,
-                                'edit'          : '<button onclick=\"editNotaPembelian(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-warning" style="color:white;">Edit</button>',
-                                'hapus'         : '<button onclick=\"hapusNotaPembelian(\''+datatable.data[i].no_surat_jalan+'\')\" class="btn btn-danger" style="color:white;">Hapus</button>',
+                                'kode_produksi'     : datatable.data[i].kode_produksi,
+                                'tanggal_produksi'  : datatable.data[i].tanggal_produksi,
+                                'edit'              : '<button onclick=\"editProduksi(\''+datatable.data[i].kode_produksi+'\')\" class="btn btn-warning" style="color:white;">Edit</button>',
+                                'hapus'             : '<button onclick=\"hapusProduksi(\''+datatable.data[i].kode_produksi+'\')\" class="btn btn-danger" style="color:white;">Hapus</button>',
                             });
                         }
                         return returnData;
                     },
                 },
                 columns : [
-                    { data  : 'no_surat_jalan' },
-                    { data  : 'no_nota' },
-                    { data  : 'tanggal_nota' },
+                    { data  : 'kode_produksi' },
+                    { data  : 'tanggal_produksi' },
                     { data  : 'edit', orderable : false, searchable : false },
                     { data  : 'hapus', orderable : false, searchable : false },
                 ],
                 columnDefs : [
-                    { targets : 2, render : $.fn.dataTable.render.moment('YYYY-MM-DD HH:mm:ss', 'D MMMM YYYY', 'id') },
+                    { targets : 1, render : $.fn.dataTable.render.moment('YYYY-MM-DD HH:mm:ss', 'D MMMM YYYY HH:mm', 'id') },
                 ],
                 // dom : 'Bfrtlip',
                 // buttons : [
@@ -326,23 +282,9 @@
                 else {
                     jQuery(this).removeClass('is-invalid');
                 }
-
-                var harga = (this.value == '') ? 0 : parseInt(this.value);
-                var kode = jQuery(this).closest('tr').data('kode');
-                var index;
-                for(var i=0; i<daftar.length; i++) {
-                    if(daftar[i].kode == kode) index = i;
-                }
-                daftar[index].harga = harga;
-                daftar[index].total = daftar[index].jumlah * daftar[index].harga;
-                $(this).closest('tr').find('#totalHarga').text('Rp '+daftar[index].total.toLocaleString('id')+',00')
-
-                var total = 0;
-                for(var i=0; i<daftar.length; i++) {
-                    total += daftar[i].total;
-                }
-                $('#totalNota').text('Rp '+total.toLocaleString('id')+',00');
             });
+
+            
         });
     </script>
 

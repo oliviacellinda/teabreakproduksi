@@ -113,7 +113,6 @@
     <script src=<?php echo base_url("assets/js/popper.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/plugins.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/main.js"); ?>></script>
-    <script src=<?php echo base_url("assets/js/lib/chosen/chosen.jquery.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/datatable/dataTables.min.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/dataTables.buttons.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/buttons.print.js")?>></script>
@@ -236,12 +235,17 @@
         function simpanEdit() {
             var flag = false;
             for(var i=0; i<resep.length; i++) {
-                if(resep[i].jumlah == 0) flag = true;
-                break;
+                if(resep[i].jumlah == 0) {
+                    flag = true;
+                    break;
+                }
             }
 
-            if(flag) {
-                alert('Periksa kembali data Anda.');
+            if(resep.length == 0) {
+                alert('Data tidak ada!');
+            }
+            else if(flag) {
+                alert('Periksa kembali data Anda');
             }
             else {
                 var resepString = JSON.stringify(resep);
@@ -254,9 +258,17 @@
                         resepString : resepString 
                     },
                     success : function(data) {
-                        jQuery('#modalEdit').modal('hide');
-                        reloadTable();
-                        alert(data);
+                        if(data == 'Data tidak ada!') {
+                            alert(data);
+                        }
+                        else if(data == 'Kode bahan jadi tidak ditemukan') {
+                            alert(data);
+                        }
+                        else if(data == 'Data berhasil disimpan') {
+                            jQuery('#modalEdit').modal('hide');
+                            reloadTable();
+                            alert(data);
+                        }
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert(errorThrown);

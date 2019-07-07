@@ -118,7 +118,6 @@
     <script src=<?php echo base_url("assets/js/popper.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/plugins.js"); ?>></script>
     <script src=<?php echo base_url("assets/js/main.js"); ?>></script>
-    <script src=<?php echo base_url("assets/js/lib/chosen/chosen.jquery.min.js"); ?>></script>
     <script src=<?php echo base_url("assets/datatable/dataTables.min.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/dataTables.buttons.js")?>></script>
     <script src=<?php echo base_url("assets/datatable/Buttons-1.5.2/js/buttons.print.js")?>></script>
@@ -155,7 +154,7 @@
                         harga   : harga,
                     },
                     success : function(response) {
-                        if(response == 'Data berhasil ditambahkan.') {
+                        if(response == 'Data berhasil ditambahkan') {
                             reloadTable();
 
                             jQuery('#kode').removeClass('is-invalid');
@@ -170,11 +169,11 @@
 
                             alert(response);
                         }
-                        else if(response == 'Kode sudah ada di dalam database.') {
+                        else if(response == 'Kode sudah ada di dalam database') {
                             jQuery('#kode').addClass('is-invalid');
                             alert(response);
                         }
-                        else if(response == 'Data gagal ditambahkan. Silakan mencoba kembali.') {
+                        else if(response == 'Data gagal ditambahkan') {
                             alert(response);
                         }
                     },
@@ -245,7 +244,7 @@
                         harga   : harga,
                     },
                     success : function(response) {
-                        if(response == 'Data berhasil diubah.') {
+                        if(response == 'Data berhasil diubah') {
                             reloadTable();
 
                             jQuery('#editKode').removeClass('is-invalid');
@@ -261,11 +260,11 @@
 
                             alert(response);
                         }
-                        else if(response == 'Kode sudah ada di dalam database.') {
+                        else if(response == 'Kode sudah ada di dalam database') {
                             jQuery('#editKode').addClass('is-invalid');
                             alert(response);
                         }
-                        else if(response == 'Data gagal diubah. Silakan mencoba kembali.') {
+                        else if(response == 'Data gagal diubah') {
                             alert(response);
                         }
                     },
