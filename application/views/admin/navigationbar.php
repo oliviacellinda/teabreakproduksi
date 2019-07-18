@@ -34,6 +34,7 @@
     <link rel="stylesheet" href=<?php echo base_url("assets/css/lib/chosen/chosen.min.css")?>>
     <link rel="stylesheet" href=<?php echo base_url("assets/css/easy-autocomplete.min.css")?>>
     <link rel="stylesheet" href=<?php echo base_url("assets/css/easy-autocomplete.themes.css")?>>
+    <link rel="stylesheet" href=<?php echo base_url("assets/css/lds-dual-ring.css")?>>
 
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
 
@@ -74,6 +75,12 @@
                     </li>
                     <li id="sistemproduksi">
                         <a href="<?=base_url('sistemproduksi');?>"> <i class="menu-icon ti-paint-bucket"></i>Sistem Produksi</a>
+                    </li>
+                    <li id="laporanbahanbaku">
+                        <a href="<?=base_url('laporanbahanbaku');?>"> <i class="menu-icon ti-agenda"></i>Laporan Bahan Baku</a>
+                    </li>
+                    <li id="laporanbahanjadi">
+                        <a href="<?=base_url('laporanbahanjadi');?>"> <i class="menu-icon ti-agenda"></i>Laporan Bahan Jadi</a>
                     </li>
                 </ul>
             </div>

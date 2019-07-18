@@ -33,6 +33,7 @@
                                 </table>
                                         
                             </div>
+
                         </div> <!-- /.card -->
                     </div> <!-- /.col-lg-12-->
 
@@ -72,8 +73,10 @@
                         <div class="col-sm-12">
                             <p><strong>Daftar Bahan Baku</strong></p>
                             <div class="input-group">
-                                <div class="input-group-btn"><button onclick="daftarBahanBaku()" class="btn btn-success">Tambah Bahan Baku</button></div>
-                            </div> 
+                                <div class="input-group-btn">
+                                    <button id="btnDaftar" onclick="daftarBahanBaku()" class="btn btn-success">Tambah Bahan Baku</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -149,7 +152,11 @@
         moment.locale('id');
         var tabel;
         var jumlahData;
+        var nomorLama;
         var daftar = new Array();
+        var daftarLama = new Array();
+        var tambah = new Array();
+        var hapus = new Array();
         var jenisAksi;
 
         function reloadTable() {
@@ -167,8 +174,10 @@
 
         function editBahanBakuMasuk(nomor) {
             daftar = new Array();
+            tambah = new Array();
+            hapus = new Array();
+            nomorLama = nomor;
             jQuery('#nomor').val(nomor);
-            jQuery('#nomor').prop('readonly', true);
             jQuery('#tabelBahanBakuMasuk tbody').remove();
             jenisAksi = 'edit';
             
@@ -191,7 +200,7 @@
                         for(var i=0; i<data.length; i++) {
                             tabelBahanBakuMasuk += '<tr data-kode="'+data[i].kode_bahan_baku+'">'+
                                 '<td>'+data[i].nama_bahan_baku+'</td>'+
-                                '<td><input type="text" class="form-control numeric" value="'+data[i].jumlah+'" style="width: 130px"></td>'+
+                                '<td><input type="number" step="0.01" class="form-control float" value="'+data[i].jumlah+'" style="width: 130px"></td>'+
                                 '<td><button onclick="hapusBahanBaku(\''+data[i].kode_bahan_baku+'\')" class="btn btn-danger" style="color:white;">Delete</button></td>'+
                             '</tr>';
                             var row = {
@@ -200,9 +209,11 @@
                                 jumlah  : data[i].jumlah
                             };
                             daftar.push(row);
+                            daftarLama.push(row);
                         }
                         tabelBahanBakuMasuk += '</tbody>';
                         jQuery('#tabelBahanBakuMasuk').append(tabelBahanBakuMasuk);
+                        jQuery('#tanggal').val(moment(data[0].tanggal_surat_jalan).format('D MMMM YYYY'));
                     }
                     jQuery('#modalEdit').modal('show');
                 },
@@ -213,6 +224,8 @@
         }
 
         function daftarBahanBaku() {
+            jQuery('#btnDaftar').prop('disabled', true);
+            jQuery('#btnDaftar').parents('.input-group').append('<div class="lds-dual-ring"></div>');
             jQuery('#tabelBahan tbody').remove();
             jQuery.ajax({
                 url     : '<?=base_url('superadmin/daftarBahanBaku');?>',
@@ -233,9 +246,13 @@
                     jQuery('#modalBahan').modal('show');
                     jQuery('#tabelBahan').append(tabelBahan);
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error   : function (jqXHR, textStatus, errorThrown) {
                     alert(errorThrown);
-                }
+                },
+                complete: function() {
+                    jQuery('#btnDaftar').prop('disabled', false);
+                    jQuery('.lds-dual-ring').remove();
+                } 
             });
         }
 
@@ -246,16 +263,57 @@
                 jumlah  : 0,
             };
             daftar.push(row);
+            tambah.push(row);
+
+            for(var i=0; i<hapus.length; i++) {
+                if(hapus[i].kode == kode) {
+                    hapus.splice(i, 1);
+                    break;
+                }
+            }
+
+            for(var i=0; i<daftarLama.length; i++) {
+                if(daftarLama[i].kode == kode) {
+                    tambah.splice(i, 1);
+                    break;
+                }
+            }
 
             jQuery(button).attr('disabled', true);
         }
 
         function hapusBahanBaku(kode) {
-            var index;
             for(var i=0; i<daftar.length; i++) {
-                if(daftar[i].kode == kode) index = i;
+                if(daftar[i].kode == kode) {
+                    hapus.push(daftar[i]);
+                    daftar.splice(i, 1);
+                    break;
+                }
             }
-            daftar.splice(index, 1);
+
+            for(var i=0; i<tambah.length; i++) {
+                if(tambah[i].kode == kode) {
+                    tambah.splice(i, 1);
+                    break;
+                }
+            }
+
+            var flag = true;
+            for(var i=0; i<daftarLama.length; i++) {
+                if(daftarLama[i].kode == kode) {
+                    flag = false;
+                    break;
+                }
+            }
+            if(flag) {
+                for(var i=0; i<hapus.length; i++) {
+                    if(hapus[i].kode == kode) {
+                        hapus.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+
             refreshDaftar();
         }
 
@@ -265,7 +323,7 @@
             for(var i=0; i<daftar.length; i++) {
                 tabelBahanBakuMasuk += '<tr data-kode="'+daftar[i].kode+'">'+
                     '<td>'+daftar[i].nama+'</td>'+
-                    '<td><input type="text" class="form-control numeric" value="'+daftar[i].jumlah+'" style="width: 130px"></td>'+
+                    '<td><input type="number" step="0.01" class="form-control float" value="'+daftar[i].jumlah+'" style="width: 130px"></td>'+
                     '<td><button onclick="hapusBahanBaku(\''+daftar[i].kode+'\')" class="btn btn-danger" style="color:white;">Delete</button></td>'+
                 '</tr>';
             }
@@ -290,18 +348,25 @@
             }
             else {
                 var daftarString = JSON.stringify(daftar);
+                var tambahString = JSON.stringify(tambah);
+                var hapusString = JSON.stringify(hapus);
                 var nomor = jQuery('#nomor').val();
                 jQuery.ajax({
                     type    : 'post',
                     url     : '<?=base_url('admin/simpanBahanBakuMasuk');?>',
                     data    : { 
                         nomor       : nomor,
+                        nomorLama   : nomorLama,
                         daftarString: daftarString,
+                        tambahString: tambahString,
+                        hapusString : hapusString,
                         jenisAksi   : jenisAksi
                     },
                     success : function(data) {
                         if(data == 'Data berhasil disimpan') {
                             daftar = new Array();
+                            tambah = new Array();
+                            hapus = new Array();
                             jQuery('#nomor').val('');
                             jQuery('#tanggal').val('');
                             jQuery('#tabelBahanBakuMasuk tbody').remove();
@@ -309,8 +374,12 @@
                             reloadTable();
                             alert(data);
                         }
-                        else {
+                        else if(data == 'Nomor sudah ada di dalam database') {
                             alert(data);
+                            jQuery('#nomor').addClass('is-invalid');
+                        }
+                        else {
+                            alert('Unknown error occured!'); console.log(data);
                         }
                     },
                     error   : function (jqXHR, textStatus, errorThrown) {
@@ -327,6 +396,12 @@
                     url     : '<?=base_url('admin/hapusBahanBakuMasuk');?>',
                     data    : { nomor : nomor },
                     success : function(data) {
+                        if(data == 'Berhasil menghapus data') {
+                            alert(data);
+                        }
+                        else (
+                            alert('Unknown error occured!');
+                        )
                         reloadTable();
                     },
                     error   : function (jqXHR, textStatus, errorThrown) {
@@ -339,7 +414,7 @@
         jQuery(document).ready(function($) {
             $.fn.dataTable.moment('D MMMM YYYY', 'id');
             tabel = jQuery('#tabelData').dataTable({
-                oLanguage : { sProcessing : "Loading..." },
+                processing : true,
                 responsive : true,
                 serverSide : true,
                 ajax : {
@@ -409,7 +484,7 @@
                 jQuery('#modalEdit').modal('show');
             });
 
-            jQuery(document).on('input', '.numeric', function() {
+            jQuery(document).on('input', '.float', function() {
                 if(this.value == '' || parseInt(this.value) == 0) {
                     jQuery(this).addClass('is-invalid');
                 }
@@ -417,7 +492,7 @@
                     jQuery(this).removeClass('is-invalid');
                 }
 
-                var jumlah = (this.value == '') ? 0 : parseInt(this.value);
+                var jumlah = (this.value == '') ? 0 : parseFloat(this.value);
                 var kode = jQuery(this).closest('tr').data('kode');
                 var index;
                 for(var i=0; i<daftar.length; i++) {

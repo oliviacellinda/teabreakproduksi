@@ -61,7 +61,7 @@
                             <div class="col-sm-12">
                                 <div class="form-group">
                                     <label for="nomor" class=" form-control-label">Tanggal Nota</label>
-                                    <input type="text" id="tanggal" class="form-control">
+                                    <input type="text" id="tanggal" class="form-control" readonly>
                                 </div>
                             </div>
                         </div>
@@ -150,13 +150,13 @@
                     }
                     else {
                         nomorLama = data[0].no_nota;
-                        var tglSurat = moment(data[0].tanggal_surat_jalan).format('D MMMM YYYY HH:mm');
-                        var tglNota = moment(data[0].tanggal_nota).format('D MMMM YYYY');
+                        var tglSurat = moment(data[0].tanggal_surat_jalan).format('D MMMM YYYY');
+                        var tglNota = (data[0].tanggal_nota != '0000-00-00') ? moment(data[0].tanggal_nota).format('D MMMM YYYY') : moment().format('D MMMM YYYY');
                         jQuery('#tglSurat').text(tglSurat);
                         jQuery('#nomor').val(data[0].no_nota);
                         jQuery('#tanggal').val(tglNota);
                         jQuery('#totalNota').text('Rp '+parseInt(data[0].total_pembelian).toLocaleString('id')+',00');
-
+                        
                         var tabelDetailNotaPembelian = '<tbody>';
                         for(var i=0; i<data.length; i++) {
                             tabelDetailNotaPembelian += '<tr data-kode="'+data[i].kode_bahan_baku+'">'+
@@ -244,7 +244,7 @@
                             jQuery('#tanggal').addClass('is-invalid');
                         }
                         else {
-                            alert('Unknown error occured!');
+                            alert('Unknown error occured!'); console.log(data);
                         }
                     },
                     error   : function (jqXHR, textStatus, errorThrown) {
@@ -291,7 +291,7 @@
                     { data  : 'hapus', orderable : false, searchable : false },
                 ],
                 columnDefs : [
-                    { targets : 2, render : $.fn.dataTable.render.moment('YYYY-MM-DD HH:mm:ss', 'D MMMM YYYY', 'id') },
+                    { targets : 2, render : $.fn.dataTable.render.moment('YYYY-MM-DD', 'D MMMM YYYY', 'id') },
                 ],
                 // dom : 'Bfrtlip',
                 // buttons : [

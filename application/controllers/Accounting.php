@@ -110,7 +110,8 @@ class Accounting extends CI_Controller {
         $data = array(
             'no_nota'           => $noNota,
             'tanggal_nota'      => $tglNota,
-            'total_pembelian'   => $total
+            'total_pembelian'   => $total,
+            'flag_edit_admin'   => 0,
         );
         $this->produk->updateData('laporan_pembelian_bahan_baku', $where, $data);
 

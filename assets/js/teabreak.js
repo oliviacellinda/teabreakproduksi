@@ -126,3 +126,7 @@ jQuery(document).on('blur', '.numeric', function() {
 		this.value = 0;
 	}
 });
+
+jQuery(document).on('input', '.float', function() {
+	this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+});

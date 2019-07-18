@@ -164,6 +164,8 @@ class Admin extends CI_Controller {
         
         $nomor = trim($this->input->post('nomor'));
         $daftarBahan = json_decode($this->input->post('daftarString'));
+        $tambah = json_decode($this->input->post('tambahString'));
+        $hapus = json_decode($this->input->post('hapusString'));
         $jenisAksi = trim($this->input->post('jenisAksi'));
         
         if($daftarBahan == '' || count($daftarBahan) == 0) {
@@ -208,7 +210,16 @@ class Admin extends CI_Controller {
             echo 'Data berhasil disimpan';
         }
         elseif($jenisAksi == 'edit') {
+            $nomorLama = trim($this->input->post('nomorLama'));
+            
             $where = array('no_surat_jalan' => $nomor);
+            if( $nomor != $nomorLama && $this->produk->countAllDataWhere('laporan_pembelian_bahan_baku', $where) > 0 ) {
+                echo 'Nomor sudah ada di dalam database';
+                die();
+            }
+
+            $where = array('no_surat_jalan' => $nomor);
+            $daftarAwal = $this->produk->getAllDataWhere('detail_pembelian_bahan_baku', $where);
             $this->produk->deleteData('detail_pembelian_bahan_baku', $where);
 
             for($i=0; $i<count($daftarBahan); $i++) {
@@ -220,16 +231,50 @@ class Admin extends CI_Controller {
                 );
                 $this->produk->insertData('detail_pembelian_bahan_baku', $detail);
 
-                $where = array(
-                    'tanggal_laporan'   => date('Y-m-d'),
-                    'kode_bahan_baku'   => $daftarBahan[$i]->kode,
-                );
-                $stokToday = $this->produk->getAllDataWhere('laporan_stok_bahan_baku', $where);
-                $stok = array(
-                    'masuk' => 'masuk + ' . ($daftarBahan[$i]->jumlah - $stokToday[0]->masuk),
-                    'sisa'  => 'sisa + ' . ($daftarBahan[$i]->jumlah - $stokToday[0]->sisa),
-                );
-                $this->produk->updateData('laporan_stok_bahan_baku', $where, $stok, false);
+                // Bandingkan daftar barang masuk lama dengan barang masuk baru
+                // Perbandingan dilakukan untuk menentukan stok saat ini
+                for($j=0; $j<count($daftarAwal); $j++) {
+                    if($daftarBahan[$i]->kode == $daftarAwal[$j]->kode_bahan_baku) {
+                        $where = array(
+                            'tanggal_laporan'   => date('Y-m-d'),
+                            'kode_bahan_baku'   => $daftarBahan[$i]->kode,
+                        );
+                        $stok = array(
+                            'masuk' => 'masuk + ' . ($daftarBahan[$i]->jumlah - $daftarAwal[$j]->jumlah),
+                            'sisa'  => 'sisa + ' . ($daftarBahan[$i]->jumlah - $daftarAwal[$j]->jumlah),
+                        );
+                        $this->produk->updateData('laporan_stok_bahan_baku', $where, $stok, false);
+                        break;
+                    }
+                }
+            }
+
+            if($tambah != '' && count($tambah) != 0) {
+                for($i=0; $i<count($tambah); $i++) {
+                    $where = array(
+                        'tanggal_laporan'   => date('Y-m-d'),
+                        'kode_bahan_baku'   => $tambah[$i]->kode,
+                    );
+                    $stok = array(
+                        'masuk' => 'masuk + ' . $tambah[$i]->jumlah,
+                        'sisa'  => 'sisa + ' . $tambah[$i]->jumlah,
+                    );
+                    $this->produk->updateData('laporan_stok_bahan_baku', $where, $stok, false);
+                }
+            }
+
+            if($hapus != '' && count($hapus) != 0) {
+                for($i=0; $i<count($hapus); $i++) {
+                    $where = array(
+                        'tanggal_laporan'   => date('Y-m-d'),
+                        'kode_bahan_baku'   => $hapus[$i]->kode,
+                    );
+                    $stok = array(
+                        'masuk' => 'masuk - ' . $hapus[$i]->jumlah,
+                        'sisa'  => 'sisa - ' . $hapus[$i]->jumlah,
+                    );
+                    $this->produk->updateData('laporan_stok_bahan_baku', $where, $stok, false);
+                }
             }
 
             echo 'Data berhasil disimpan';          
@@ -250,16 +295,26 @@ class Admin extends CI_Controller {
         $where = array('no_surat_jalan' => $nomor);
         $detailLaporan = $this->produk->getAllDataWhere('detail_pembelian_bahan_baku', $where);
         for($i=0; $i<count($detailLaporan); $i++) {
-            
+            $where_detail = array(
+                'tanggal_laporan'   => date('Y-m-d'),
+                'kode_bahan_baku'   => $detailLaporan[$i]->kode_bahan_baku,
+            );
+            $stok = array(
+                'masuk' => 'masuk - ' . $detailLaporan[$i]->jumlah,
+                'sisa'  => 'sisa - ' . $detailLaporan[$i]->jumlah,
+            );
+            $this->produk->updateData('laporan_stok_bahan_baku', $where_detail, $stok, false);
         }
 
         $this->produk->deleteData('laporan_pembelian_bahan_baku', $where);
+
+        echo 'Berhasil menghapus data';
     }
 
 
     // SISTEM PRODUKSI
 
-    public function sistemproduksi() {
+    public function sistemProduksi() {
         $status = $this->session->userdata('status');
         if($status != 'admin') {
             redirect(base_url('login'));
@@ -270,10 +325,10 @@ class Admin extends CI_Controller {
         }
     }
 
-    public function daftarproduksi() {
-        $this->load->library('datatable');
-        $this->datatable->select('kode_produksi, tanggal_produksi');
-        $this->datatable->from('produksi');
+    public function daftarProduksi() {
+        $this->load->library('datatables');
+        $this->datatables->select('kode_produksi, tanggal_produksi');
+        $this->datatables->from('produksi');
         echo $this->datatables->generate();
     }
 
@@ -294,5 +349,51 @@ class Admin extends CI_Controller {
         }
 
         echo json_encode($data);
+    }
+
+
+    // LAPORAN BAHAN BAKU
+
+    public function laporanBahanBaku() {
+        $status = $this->session->userdata('status');
+        if($status != 'admin') {
+            redirect(base_url('login'));
+        }
+        else {
+            $this->load->view('admin/navigationbar');
+            $this->load->view('admin/laporanbahanbaku');
+        }
+    }
+
+    public function laporanStokBahanBaku() {
+        $tanggal = $this->input->post('tanggal');
+        $this->load->library('datatables');
+        $this->datatables->select('tanggal_laporan, kode_bahan_baku, nama_bahan_baku, masuk, keluar, sisa');
+        $this->datatables->from('laporan_stok_bahan_baku');
+        $this->datatables->where('tanggal_laporan', $tanggal);
+        echo $this->datatables->generate();
+    }
+
+
+    // LAPORAN BAHAN JADI
+
+    public function laporanBahanJadi() {
+        $status = $this->session->userdata('status');
+        if($status != 'admin') {
+            redirect(base_url('login'));
+        }
+        else {
+            $this->load->view('admin/navigationbar');
+            $this->load->view('admin/laporanbahanjadi');
+        }
+    }
+
+    public function laporanStokBahanJadi() {
+        $tanggal = $this->input->post('tanggal');
+        $this->load->library('datatables');
+        $this->datatables->select('tanggal_laporan, kode_bahan_jadi, nama_bahan_jadi, masuk, keluar, sisa');
+        $this->datatables->from('laporan_stok_bahan_jadi');
+        $this->datatables->where('tanggal_laporan', $tanggal);
+        echo $this->datatables->generate();
     }
 }

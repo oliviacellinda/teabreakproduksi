@@ -20,6 +20,7 @@
                             <div class="card-body">
 
                                 <button onclick="tambahProduksi()" class="btn btn-success" style="margin-bottom: 10px;">Tambah Produksi</button>
+                                <div class="lds-dual-ring"></div>
                             
                                 <table id="tabelData" class="table table-striped table-bordered" style="width: 100%;" width="100%">
                                     <thead>
@@ -82,9 +83,11 @@
                     </div>
 
                     <div class="row" style="margin-top: 10px;">
-                        <div class="form-group">
-                            <label for="hasilSebenarnya" class=" form-control-label">Hasil Sebenarnya</label>
-                            <input type="text" name="hasilSebenarnya" id="hasilSebenarnya" class="form-control numeric">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="hasilSebenarnya" class=" form-control-label">Hasil Sebenarnya</label>
+                                <input type="text" name="hasilSebenarnya" id="hasilSebenarnya" class="form-control numeric">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,7 +126,23 @@
             tabel.api().ajax.reload(null,false);
         }
 
+        function loadBahanJadi() {
+            jQuery.ajax({
+                type    : 'post',
+                url     : '<?=base_url('superadmin/daftarBahanJadi');?>',
+                dataType: 'json',
+                success : function(datatable) {
+                    var option = '<option></option>';
+                    for(var i=0; i<datatable.data.length; i++) {
+                        
+                    }
+                }
+            });
+        }
+
         function tambahProduksi() {
+
+
             jQuery('#hasilSebenarnya').prop('disabled', true);
             jQuery('#modalEdit').modal('show');
             jenisAksi = 'tambah';
